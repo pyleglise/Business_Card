@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="first_name">Pierre-Yves</string>
+    <string name="last_name">Léglise</string>
+    <string name="position">Consultant SI</string>
+    <string name="email">contact@axialdata.net</string>
+    <string name="phone">+596 696 36 77 41</string>
+    <string name="linkedin_profile">https://www.linkedin.com/in/pierre-yves-leglise</string>
+</resources>
