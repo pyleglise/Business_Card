@@ -25,7 +25,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -45,45 +44,36 @@ class MainActivity : ComponentActivity() {
         setContent {
 
             BusinessCardTheme{
-                val colors = MaterialTheme.colorScheme
-                Surface(
-                    color = colors.surface,
-                    modifier = Modifier
-                        .fillMaxSize()
-            )  {
-
-
-                    BusinessCard(
-                        firstName = UserData.firstName,
-                        lastName = UserData.lastName,
-                        title = UserData.title,
-                        email = UserData.email,
-                        phone = UserData.phone,
-                        social = UserData.social
-                    )
-                }
+                BusinessCardScreen(
+                    userData = UserData // AssumingUserData is a data class holding user info
+                )
             }
         }
     }
 }
 
 @Composable
-fun BusinessCard(
-    firstName: String,
-    lastName: String,
-    title: String,
-    email: String,
-    phone: String,
-    social: String,
-    modifier: Modifier = Modifier
-){
-    val avatarImage = painterResource(R.drawable.image_peewai)
-    val logoImage = painterResource(R.drawable.logo_axialdata_v2_noir_banniere_trans)
+fun BusinessCardScreen(userData: UserData, modifier: Modifier = Modifier) {
+    val colors = MaterialTheme.colorScheme
+    Surface(
+        color = colors.surface,
+        modifier = modifier.fillMaxSize()
+    ) {
+        BusinessCard(
+            userData = userData
+        )
+    }
+}
+
+@Composable
+fun BusinessCard(userData: UserData, modifier: Modifier = Modifier){
     val configuration = LocalConfiguration.current
-    when (configuration.orientation) {
+    when (configuration.orientation) {   // Landscape
         Configuration.ORIENTATION_LANDSCAPE -> {
             Row(
-                modifier = modifier.padding(0.dp,40.dp,0.dp,0.dp),
+                modifier = modifier
+                    .padding(top = 40.dp)
+                    .fillMaxSize(),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -91,133 +81,96 @@ fun BusinessCard(
                     modifier = modifier,
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
-                ) {
-                    UserInfoCard(avatarImage, firstName, lastName, modifier, title, logoImage)
-                }
+                ) { UserInfoCard(modifier = modifier, userData = userData) }
+
                 Column(
                     modifier = modifier,
                     horizontalAlignment = Alignment.Start,
                     verticalArrangement = Arrangement.Bottom
-                )
-                {
-                    UserCoordCard(modifier, phone, email, social)
-//                    Spacer(modifier = Modifier.height(40.dp))
-                }
-
+                ) { UserCoordCard(modifier = modifier, userData = userData) }
             }
         }
-        else -> {
+        else -> {   // Portrait
             Column(
                 modifier = modifier,
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
-            ) {
-                UserInfoCard(avatarImage, firstName, lastName, modifier, title, logoImage)
-            }
+            ) { UserInfoCard(modifier = modifier, userData = userData) }
+
             Column(
-                modifier = modifier.padding(0.dp, 0.dp, 0.dp, 50.dp),
+                modifier = modifier.padding(bottom = 50.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Bottom
-            )
-            {
-                UserCoordCard(modifier, phone, email, social)
-//                Spacer(modifier = Modifier.height(60.dp))
-            }
+            ) { UserCoordCard(modifier = modifier, userData = userData) }
         }
     }
-
-
 }
 
 @Composable
 private fun UserCoordCard(
     modifier: Modifier,
-    phone: String,
-    email: String,
-    social: String
+    userData: UserData
 ) {
     Column(modifier = modifier) {
-        Row(
-            modifier = modifier,
-            horizontalArrangement = Arrangement.Absolute.Left,
-            //            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(Icons.Rounded.Phone, contentDescription = "phone")
+        ContactRow(icon = Icons.Rounded.Phone, text = userData.phone)
+        ContactRow(icon = Icons.Rounded.Email, text = userData.email)
+        ContactRow(icon = Icons.Rounded.Notifications, text = userData.social)
+    }
+}
 
-            Text(
-                text = " $phone",
-                fontSize = 24.sp,
-                modifier = modifier
-            )
-
-        }
-        Row(
-            modifier = modifier,
-            //            horizontalArrangement = Arrangement.Center,
-            //            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(Icons.Rounded.Email, contentDescription = "email")
-
-            Text(
-                text = " $email",
-                fontSize = 24.sp,
-                modifier = modifier
-            )
-
-        }
-
-        Row(
-            modifier = modifier,
-            //            horizontalArrangement = Arrangement.Center,
-            //            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(Icons.Rounded.Notifications, contentDescription = "social")
-
-            Text(
-                text = " $social",
-                fontSize = 24.sp,
-                modifier = modifier
-            )
-
-        }
+@Composable
+private fun ContactRow(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    text: String,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically // Align icon and text vertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = text,
+            tint = MaterialTheme.colorScheme.primary // Use primary color for icons
+        )
+        Text(
+            text = " $text",
+            fontSize = 24.sp,
+            modifier = Modifier.padding(start = 8.dp) // Add spacing between icon and text
+        )
     }
 }
 
 @Composable
 private fun UserInfoCard(
-    avatarImage: Painter,
-    firstName: String,
-    lastName: String,
     modifier: Modifier,
-    title: String,
-    logoImage: Painter
+    userData : UserData
 ) {
+    val fullName = "${userData.firstName} ${userData.lastName}"
     Image(
-        painter = avatarImage,
-        contentDescription = "$firstName $lastName",
+        painter = painterResource(userData.avatarImage),
+        contentDescription = fullName,
         modifier = modifier
             .size(200.dp)
             .clip(RoundedCornerShape(40.dp))
     )
     Text(
-        text = "$firstName $lastName",
+        text = fullName,
         fontSize = 40.sp,
         modifier = modifier
     )
     Text(
-        text = title,
+        text = userData.title,
         fontSize = 25.sp,
         modifier = modifier
     )
     Image(
-        painter = logoImage,
+        painter = painterResource(userData.logoImage),
         contentDescription = "axialdata",
         modifier = modifier
             .size(450.dp, 80.dp)
     )
 }
-
-
 
 @Preview(
     showBackground = true,
@@ -228,21 +181,6 @@ private fun UserInfoCard(
 @Composable
 fun BusinessCardPreview() {
     BusinessCardTheme {
-        val colors = MaterialTheme.colorScheme
-        Surface(
-            color = colors.surface,
-            modifier = Modifier
-                .fillMaxSize()
-        )  {
-            BusinessCard(
-                firstName = UserData.firstName,
-                lastName = UserData.lastName,
-                title = UserData.title,
-                email = UserData.email,
-                phone = UserData.phone,
-                social = UserData.social
-            )
-        }
-
+            BusinessCardScreen(userData = UserData)
     }
 }
