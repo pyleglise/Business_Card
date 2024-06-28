@@ -42,11 +42,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-
             BusinessCardTheme{
-                BusinessCardScreen(
-                    userData = UserData // AssumingUserData is a data class holding user info
-                )
+                BusinessCardScreen(userData = UserData)
             }
         }
     }
@@ -166,7 +163,7 @@ private fun UserInfoCard(
     )
     Image(
         painter = painterResource(userData.logoImage),
-        contentDescription = "axialdata",
+        contentDescription = "Company",
         modifier = modifier
             .size(450.dp, 80.dp)
     )
